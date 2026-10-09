@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
+import { CalendarDaysIcon } from "lucide-react";
+
 import { Customizer } from "@/components/customizer";
 import { Timeline } from "@/components/timeline";
 import {
@@ -18,17 +20,39 @@ import {
   type Settings,
 } from "@/lib/calendar";
 
+const RING = 2 * Math.PI * 52;
+const RING_DAYS = 60;
+
 function Countdown({ next, now }: { next: CalEvent; now: Date }) {
   const days = daysUntil(next, now);
   const range = next.s.getTime() === next.e.getTime() ? fmtDay(next.s) : `${fmtDay(next.s)} – ${fmtDay(next.e)}`;
   return (
-    <div className="rounded-2xl border bg-card p-6 shadow-sm">
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-7xl leading-none font-extrabold tracking-tight text-brand">{days > 0 ? days : "Now"}</span>
-        {days > 0 && <span className="text-lg font-semibold">{days === 1 ? "day" : "days"}</span>}
+    <div className="flex items-center gap-4 border-b pb-5">
+      <div className="relative size-20 shrink-0">
+        <svg viewBox="0 0 120 120" className="absolute inset-0 -rotate-90" aria-hidden>
+          <circle cx={60} cy={60} r={52} fill="none" strokeWidth={9} className="stroke-muted" />
+          <circle
+            cx={60}
+            cy={60}
+            r={52}
+            fill="none"
+            strokeWidth={9}
+            strokeLinecap="round"
+            className="stroke-brand"
+            strokeDasharray={RING}
+            strokeDashoffset={RING * Math.min(Math.max(days, 0), RING_DAYS) / RING_DAYS}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-3xl leading-none font-extrabold tracking-tight text-brand">{days > 0 ? days : "Now"}</span>
+        </div>
       </div>
-      <div className="mt-1.5 font-semibold">{days > 0 ? `until ${next.title}` : next.title}</div>
-      <div className="text-sm text-muted-foreground">{range}</div>
+      <div className="min-w-0">
+        <div className="leading-snug font-semibold">
+          {days > 0 ? `${days === 1 ? "day" : "days"} until ${next.title}` : next.title}
+        </div>
+        <div className="text-sm text-muted-foreground">{range}</div>
+      </div>
     </div>
   );
 }
@@ -62,29 +86,28 @@ export default function Home() {
   const next = rows.find((e) => e.category === "break" || e.category === "finals") ?? rows[0];
 
   return (
-    <div className="min-h-screen">
-      <header className="px-4 pt-14 pb-10">
-        <div className="mx-auto grid max-w-[1040px] items-center gap-8 md:grid-cols-[1.3fr_1fr]">
-          <div>
-            <div className="text-xs font-bold tracking-[0.14em] text-brand uppercase">University of Maryland</div>
-            <h1 className="mt-2 mb-3 text-5xl leading-none font-bold tracking-tight md:text-6xl">
-              Never miss a break again.
-            </h1>
-            <p className="max-w-[30em] text-muted-foreground">
-              Subscribe once. Breaks, finals, and holidays show up in your calendar, with reminders set the way you like.
-            </p>
-          </div>
-          {next && now && <Countdown next={next} now={now} />}
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-[1040px] items-center gap-2.5 px-6">
+          <CalendarDaysIcon className="size-6 text-brand" />
+          <span className="text-lg font-medium">UMD Calendar</span>
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-[1040px] gap-7 px-4 pb-16 md:grid-cols-[340px_1fr]">
-        <Customizer settings={settings} onChange={setEdited} links={links} />
-        {failed ? (
-          <p className="text-muted-foreground">Couldn&apos;t load the calendar. Try again in a moment.</p>
-        ) : (
-          now && <Timeline events={rows} settings={settings} now={now} />
-        )}
+      <main className="mx-auto grid max-w-[1040px] px-6 py-8 md:grid-cols-[300px_1fr]">
+        <Customizer
+          settings={settings}
+          onChange={setEdited}
+          links={links}
+          top={next && now ? <Countdown next={next} now={now} /> : null}
+        />
+        <div className="mt-8 md:mt-0 md:pl-10">
+          {failed ? (
+            <p className="text-muted-foreground">Couldn&apos;t load the calendar. Try again in a moment.</p>
+          ) : (
+            now && <Timeline events={rows} settings={settings} now={now} />
+          )}
+        </div>
       </main>
     </div>
   );
