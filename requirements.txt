@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+icalendar
+fastapi
+uvicorn
+httpx
+pytest
