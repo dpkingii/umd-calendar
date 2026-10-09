@@ -4,6 +4,8 @@ A subscribable calendar of UMD academic dates (fall break, finals, holidays, ter
 
 **Live:** https://umd-calendar-tau.vercel.app
 
+![UMD Calendar](docs/screenshot.png)
+
 - **Frontend:** Next.js + Tailwind + [shadcn/ui](https://ui.shadcn.com) (`app/`, `components/`, `lib/`)
 - **Backend:** FastAPI (`app.py`, `scrape.py`, `build_ics.py`), served on Vercel via `api/index.py`
 
