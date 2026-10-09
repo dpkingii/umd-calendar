@@ -2,7 +2,6 @@ import time
 
 import requests
 from fastapi import FastAPI, HTTPException, Query, Response
-from fastapi.staticfiles import StaticFiles
 
 from build_ics import build_ics
 from scrape import CATEGORIES, Event, fetch_events
@@ -42,12 +41,12 @@ def parse_alerts(raw: str) -> tuple[int, ...]:
     return tuple(sorted(days, reverse=True))
 
 
-@app.get("/events.json")
+@app.get("/api/events.json")
 def events() -> list[Event]:
     return get_events()
 
 
-@app.get("/feed.ics")
+@app.get("/api/feed.ics")
 def feed(
     alerts: str = "7,1",
     hour: int = Query(9, ge=0, le=23),
@@ -68,5 +67,3 @@ def feed(
         headers={"Cache-Control": "public, s-maxage=21600"},
     )
 
-
-app.mount("/", StaticFiles(directory="public", html=True, check_dir=False), name="static")

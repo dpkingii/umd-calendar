@@ -2,3 +2,12 @@
 __pycache__/
 .pytest_cache/
 site/
+
+# node / next
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+.env*

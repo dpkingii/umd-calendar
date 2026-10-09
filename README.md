@@ -2,11 +2,13 @@
 
 A subscribable calendar of UMD academic dates (fall break, finals, holidays, term start/end) with reminders you configure.
 
-A FastAPI app scrapes the [UMD Academic Catalog semester calendar](https://academiccatalog.umd.edu/about-university/academic-calendar/semester-calendar/) (cached 6 hours) and serves:
+- **Frontend:** Next.js + Tailwind + [shadcn/ui](https://ui.shadcn.com) (`app/`, `components/`, `lib/`)
+- **Backend:** FastAPI (`app.py`, `scrape.py`, `build_ics.py`), served on Vercel via `api/index.py`
 
-- `/` the customizer page (`public/index.html`)
-- `/feed.ics` an RFC 5545 feed built from query params
-- `/events.json` the parsed events
+The API scrapes the [UMD Academic Catalog semester calendar](https://academiccatalog.umd.edu/about-university/academic-calendar/semester-calendar/) (cached 6 hours) and serves:
+
+- `/api/feed.ics` an RFC 5545 feed built from query params
+- `/api/events.json` the parsed events
 
 ## Feed parameters
 
@@ -17,7 +19,7 @@ A FastAPI app scrapes the [UMD Academic Catalog semester calendar](https://acade
 | `cats` | all | `break,finals,classes,other` |
 | `terms` | all | `fall,winter,spring,summer` |
 
-Example: `/feed.ics?alerts=14,3,0&hour=8&cats=break,finals`
+Example: `/api/feed.ics?alerts=14,3,0&hour=8&cats=break,finals`
 
 ## Subscribe
 
@@ -25,10 +27,21 @@ Open the site, pick your reminders, and use the buttons. Or paste a feed URL int
 
 ## Develop
 
+Run the API and the web app side by side. In development, Next proxies `/api/*` to the API on port 8000.
+
 ```
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest
-.venv/bin/uvicorn app:app --reload   # http://localhost:8000
+npm install
+
+.venv/bin/uvicorn app:app --reload --port 8000   # terminal 1
+npm run dev                                      # terminal 2, http://localhost:3000
+```
+
+Tests and checks:
+
+```
+.venv/bin/python -m pytest   # parser, ICS, and API
+npm run lint && npm run build
 ```
 
 The parser is tested against a saved copy of the page (`tests/catalog_fixture.html`).
@@ -40,4 +53,4 @@ The parser is tested against a saved copy of the page (`tests/catalog_fixture.ht
 
 ## Deploy
 
-Import the repo into Vercel. It detects the FastAPI `app` in `app.py` and serves `public/` as static files, so no config is needed.
+Import the repo into Vercel. It builds the Next.js app and runs `api/index.py` as a Python function; `vercel.json` rewrites `/api/*` to it. Not yet deployed or tested on Vercel.

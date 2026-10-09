@@ -31,29 +31,29 @@ def fall_break(resp):
 
 
 def test_default_feed(client):
-    resp = client.get("/feed.ics")
+    resp = client.get("/api/feed.ics")
     assert resp.headers["content-type"].startswith("text/calendar")
     assert len(vevents(resp)) == 27
     assert triggers(fall_break(resp)) == [timedelta(days=-7, hours=9), timedelta(days=-1, hours=9)]
 
 
 def test_custom_alerts_and_hour(client):
-    resp = client.get("/feed.ics", params={"alerts": "14,0", "hour": 8})
+    resp = client.get("/api/feed.ics", params={"alerts": "14,0", "hour": 8})
     assert triggers(fall_break(resp)) == [timedelta(days=-14, hours=8), timedelta(hours=8)]
 
 
 def test_no_alerts(client):
-    resp = client.get("/feed.ics", params={"alerts": ""})
+    resp = client.get("/api/feed.ics", params={"alerts": ""})
     assert triggers(fall_break(resp)) == []
 
 
 def test_category_filter(client):
-    resp = client.get("/feed.ics", params={"cats": "finals"})
+    resp = client.get("/api/feed.ics", params={"cats": "finals"})
     assert {str(e.get("categories").cats[0]) for e in vevents(resp)} == {"finals"}
 
 
 def test_term_filter(client):
-    resp = client.get("/feed.ics", params={"terms": "winter"})
+    resp = client.get("/api/feed.ics", params={"terms": "winter"})
     assert len(vevents(resp)) == 3
 
 
@@ -62,11 +62,11 @@ def test_term_filter(client):
     [{"alerts": "abc"}, {"alerts": "61"}, {"alerts": "1,2,3,4,5,6,7"}, {"hour": 24}, {"cats": "nope"}, {"terms": "nope"}],
 )
 def test_invalid_params_rejected(client, params):
-    assert client.get("/feed.ics", params=params).status_code == 422
+    assert client.get("/api/feed.ics", params=params).status_code == 422
 
 
 def test_events_json(client):
-    rows = client.get("/events.json").json()
+    rows = client.get("/api/events.json").json()
     assert len(rows) == 27
     assert {
         "title": "Fall Break",
