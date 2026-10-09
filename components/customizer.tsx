@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, InfoIcon } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
-import { CATS, LEADS, TERMS, hourLabel, type Settings } from "@/lib/calendar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { CATS, LEADS, TERMS, type Settings } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
-
-const HOURS = Array.from({ length: 24 }, (_, h) => ({ value: String(h), label: hourLabel(h) }));
 
 type Links = { url: string; apple: string; google: string };
 
@@ -40,10 +38,25 @@ export function Chips<T extends string | number>({
   );
 }
 
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
+function Group({ title, info, children }: { title: string; info?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">{title}</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">{title}</h2>
+        {info && (
+          <Tooltip>
+            <TooltipTrigger
+              aria-label={`About ${title.toLowerCase()}`}
+              delay={100}
+              closeDelay={150}
+              className="-m-1.5 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <InfoIcon className="size-4" />
+            </TooltipTrigger>
+            <TooltipContent side="right">{info}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
       {children}
     </div>
   );
@@ -72,26 +85,11 @@ export function Customizer({
   return (
     <div className="space-y-5 md:sticky md:top-20 md:max-h-[calc(100vh-6rem)] md:self-start md:overflow-y-auto md:border-r md:pr-8">
         {top}
-        <Group title="Remind me">
+        <Group
+          title="Remind me"
+          info="How far ahead your calendar alerts you before each event. Pick several: 1 week + 1 day gives two reminders per event."
+        >
           <Chips options={LEADS} value={settings.alerts} onChange={(alerts) => onChange({ ...settings, alerts })} />
-        </Group>
-        <Group title="Reminder time">
-          <Select
-            items={HOURS}
-            value={String(settings.hour)}
-            onValueChange={(v) => v !== null && onChange({ ...settings, hour: Number(v) })}
-          >
-            <SelectTrigger className="h-9 w-full" aria-label="Reminder time">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {HOURS.map((h) => (
-                <SelectItem key={h.value} value={h.value}>
-                  {h.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </Group>
         <Group title="Include">
           <Chips options={CATS} value={settings.cats} onChange={(cats) => onChange({ ...settings, cats })} />
@@ -99,7 +97,10 @@ export function Customizer({
         <Group title="Terms">
           <Chips options={TERMS} value={settings.terms} onChange={(terms) => onChange({ ...settings, terms })} />
         </Group>
-        <div className="space-y-2">
+        <Group
+          title="Subscribe"
+          info="Adds this feed to your calendar app once. After that it updates itself, so new dates and your reminders show up without re-importing. Pick Google or Apple, or copy the link for any other app."
+        >
           <a
             href={links?.google}
             target="_blank"
@@ -116,7 +117,7 @@ export function Customizer({
               {copied ? "Copied" : "Copy link"}
             </Button>
           </div>
-        </div>
+        </Group>
     </div>
   );
 }
