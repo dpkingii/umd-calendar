@@ -2,6 +2,8 @@
 
 A subscribable calendar of UMD academic dates (fall break, finals, holidays, term start/end) with reminders you configure.
 
+**Live:** https://umd-calendar-tau.vercel.app
+
 - **Frontend:** Next.js + Tailwind + [shadcn/ui](https://ui.shadcn.com) (`app/`, `components/`, `lib/`)
 - **Backend:** FastAPI (`app.py`, `scrape.py`, `build_ics.py`), served on Vercel via `api/index.py`
 
@@ -53,4 +55,4 @@ The parser is tested against a saved copy of the page (`tests/catalog_fixture.ht
 
 ## Deploy
 
-Import the repo into Vercel. It builds the Next.js app and runs `api/index.py` as a Python function; `vercel.json` rewrites `/api/*` to it. Not yet deployed or tested on Vercel.
+Import the repo into Vercel. It builds the Next.js app and runs `api/index.py` as a Python function; `vercel.json` rewrites `/api/*` to it. Deployed at https://umd-calendar-tau.vercel.app; every push to `main` redeploys.
