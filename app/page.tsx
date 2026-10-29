@@ -83,7 +83,6 @@ export default function Home() {
 
   const links = useMemo(() => (ready ? feedLinks(window.location.origin, settings) : null), [ready, settings]);
   const rows = useMemo(() => (now ? upcoming(events, settings, now) : []), [events, settings, now]);
-  const apple = ready && /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
   const next = rows.find((e) => e.category === "break" || e.category === "finals") ?? rows[0];
 
   return (
@@ -95,7 +94,7 @@ export default function Home() {
             UMD Calendar
           </h1>
           {next && now && <Countdown next={next} now={now} />}
-          <Subscribe links={links} apple={apple} />
+          <Subscribe links={links} />
           <Customize settings={settings} onChange={setEdited} />
         </aside>
         <div>

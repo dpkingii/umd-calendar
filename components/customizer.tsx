@@ -68,7 +68,7 @@ function Group({ title, info, children }: { title: string; info?: string; childr
   );
 }
 
-export function Subscribe({ links, apple }: { links: Links | null; apple: boolean }) {
+export function Subscribe({ links }: { links: Links | null }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -78,21 +78,19 @@ export function Subscribe({ links, apple }: { links: Links | null; apple: boolea
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const google = { href: links?.google, target: "_blank", rel: "noopener" };
-  const primary = apple ? { label: "Add to Apple Calendar", href: links?.apple } : { label: "Add to Google Calendar", ...google };
-  const other = apple ? { label: "Google Calendar", ...google } : { label: "Apple Calendar", href: links?.apple };
-
   return (
     <div className="space-y-3">
       <a
-        {...primary}
+        href={links?.google}
+        target="_blank"
+        rel="noopener"
         className={cn(buttonVariants({ size: "lg" }), "h-11 w-full rounded-full bg-brand text-base text-white hover:bg-brand/90")}
       >
-        {primary.label}
+        Add to Google Calendar
       </a>
       <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-        <a {...other} className={TEXT_LINK}>
-          {other.label}
+        <a href={links?.apple} className={TEXT_LINK}>
+          Apple Calendar
         </a>
         <span aria-hidden>·</span>
         <button type="button" onClick={copy} className={cn(TEXT_LINK, "inline-flex items-center gap-1.5")}>
