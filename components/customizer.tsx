@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { CheckIcon, CopyIcon, InfoIcon } from "lucide-react";
+import { Fragment, useState } from "react";
+import { CheckIcon, ChevronDownIcon, CopyIcon, InfoIcon } from "lucide-react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { CATS, LEADS, TERMS, type Settings } from "@/lib/calendar";
+import { CATS, LEADS, TERMS, summarize, type Settings } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
 
 type Links = { url: string; apple: string; google: string };
@@ -14,6 +14,8 @@ type Links = { url: string; apple: string; google: string };
 const ICON_SWAP = "col-start-1 row-start-1 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
 const ICON_SHOWN = "scale-100 opacity-100 blur-none";
 const ICON_HIDDEN = "opacity-0 motion-safe:scale-25 motion-safe:blur-[4px]";
+const TEXT_LINK =
+  "-my-1 py-1 transition-colors duration-150 hover:text-foreground [-webkit-tap-highlight-color:transparent]";
 
 export function Chips<T extends string | number>({
   options,
@@ -32,7 +34,7 @@ export function Chips<T extends string | number>({
           variant="outline"
           pressed={value.includes(v)}
           onPressedChange={(on) => onChange(options.map(([o]) => o).filter((o) => (o === v ? on : value.includes(o))))}
-          className="h-8 rounded-full px-3 text-muted-foreground [-webkit-tap-highlight-color:transparent] aria-pressed:border-brand/40 aria-pressed:bg-brand/10 aria-pressed:text-brand aria-pressed:hover:bg-brand/15"
+          className="h-8 rounded-full px-3 text-muted-foreground [-webkit-tap-highlight-color:transparent] aria-pressed:border-foreground/15 aria-pressed:bg-foreground/[0.06] aria-pressed:text-foreground aria-pressed:hover:bg-foreground/10"
         >
           {value.includes(v) && <CheckIcon />}
           {label}
@@ -66,17 +68,7 @@ function Group({ title, info, children }: { title: string; info?: string; childr
   );
 }
 
-export function Customizer({
-  settings,
-  onChange,
-  links,
-  top,
-}: {
-  settings: Settings;
-  onChange: (next: Settings) => void;
-  links: Links | null;
-  top?: React.ReactNode;
-}) {
+export function Subscribe({ links, apple }: { links: Links | null; apple: boolean }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -86,9 +78,54 @@ export function Customizer({
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const google = { href: links?.google, target: "_blank", rel: "noopener" };
+  const primary = apple ? { label: "Add to Apple Calendar", href: links?.apple } : { label: "Add to Google Calendar", ...google };
+  const other = apple ? { label: "Google Calendar", ...google } : { label: "Apple Calendar", href: links?.apple };
+
   return (
-    <div className="space-y-5 md:sticky md:top-20 md:max-h-[calc(100vh-6rem)] md:self-start md:overflow-y-auto md:overscroll-contain md:border-r md:pr-8">
-        {top}
+    <div className="space-y-3">
+      <a
+        {...primary}
+        className={cn(buttonVariants({ size: "lg" }), "h-11 w-full rounded-full bg-brand text-base text-white hover:bg-brand/90")}
+      >
+        {primary.label}
+      </a>
+      <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
+        <a {...other} className={TEXT_LINK}>
+          {other.label}
+        </a>
+        <span aria-hidden>·</span>
+        <button type="button" onClick={copy} className={cn(TEXT_LINK, "inline-flex items-center gap-1.5")}>
+          <span className="grid" aria-hidden>
+            <CopyIcon className={cn("size-3.5", ICON_SWAP, copied ? ICON_HIDDEN : ICON_SHOWN)} />
+            <CheckIcon className={cn("size-3.5", ICON_SWAP, copied ? ICON_SHOWN : ICON_HIDDEN)} />
+          </span>
+          {copied ? "Copied" : "Copy link"}
+        </button>
+      </div>
+      <p className="text-center text-xs text-muted-foreground">Add it once. New dates show up on their own.</p>
+    </div>
+  );
+}
+
+export function Customize({ settings, onChange }: { settings: Settings; onChange: (next: Settings) => void }) {
+  return (
+    <details className="group rounded-xl bg-muted/60 px-4 py-3">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm [-webkit-tap-highlight-color:transparent] [&::-webkit-details-marker]:hidden">
+        <span className="flex flex-wrap items-center gap-x-1.5 text-muted-foreground">
+          {summarize(settings).map((part, i) => (
+            <Fragment key={part}>
+              {i > 0 && <span aria-hidden>·</span>}
+              <span>{part}</span>
+            </Fragment>
+          ))}
+        </span>
+        <span className="flex shrink-0 items-center gap-1 font-medium">
+          Edit
+          <ChevronDownIcon className="size-4 group-open:rotate-180 motion-safe:transition-[rotate] motion-safe:duration-150" />
+        </span>
+      </summary>
+      <div className="space-y-4 pt-4">
         <Group
           title="Remind me"
           info="How far ahead your calendar alerts you before each event. Pick several: 1 week + 1 day gives two reminders per event."
@@ -101,31 +138,7 @@ export function Customizer({
         <Group title="Terms">
           <Chips options={TERMS} value={settings.terms} onChange={(terms) => onChange({ ...settings, terms })} />
         </Group>
-        <Group
-          title="Subscribe"
-          info="Adds this feed to your calendar app once. After that it updates itself, so new dates and your reminders show up without re-importing. Pick Google or Apple, or copy the link for any other app."
-        >
-          <a
-            href={links?.google}
-            target="_blank"
-            rel="noopener"
-            className={cn(buttonVariants({ size: "lg" }), "h-10 w-full rounded-full bg-brand text-white hover:bg-brand/90")}
-          >
-            Add to Google Calendar
-          </a>
-          <div className="grid grid-cols-2 gap-2">
-            <a href={links?.apple} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-10 rounded-full")}>
-              Apple Calendar
-            </a>
-            <Button variant="outline" size="lg" className="h-10 rounded-full" onClick={copy}>
-              <span className="grid" aria-hidden>
-                <CopyIcon className={cn(ICON_SWAP, copied ? ICON_HIDDEN : ICON_SHOWN)} />
-                <CheckIcon className={cn(ICON_SWAP, copied ? ICON_SHOWN : ICON_HIDDEN)} />
-              </span>
-              {copied ? "Copied" : "Copy link"}
-            </Button>
-          </div>
-        </Group>
-    </div>
+      </div>
+    </details>
   );
 }

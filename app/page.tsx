@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { CalendarDaysIcon } from "lucide-react";
 
-import { Customizer } from "@/components/customizer";
+import { Customize, Subscribe } from "@/components/customizer";
 import { Timeline } from "@/components/timeline";
 import {
   DEFAULTS,
@@ -27,8 +27,8 @@ function Countdown({ next, now }: { next: CalEvent; now: Date }) {
   const days = daysUntil(next, now);
   const range = next.s.getTime() === next.e.getTime() ? fmtDay(next.s) : `${fmtDay(next.s)} – ${fmtDay(next.e)}`;
   return (
-    <div className="flex items-center gap-4 border-b pb-5">
-      <div className="relative size-20 shrink-0">
+    <div className="flex items-center gap-4">
+      <div className="relative size-24 shrink-0">
         <svg viewBox="0 0 120 120" className="absolute inset-0 -rotate-90" aria-hidden>
           <circle cx={60} cy={60} r={52} fill="none" strokeWidth={9} className="stroke-muted" />
           <circle
@@ -48,7 +48,7 @@ function Countdown({ next, now }: { next: CalEvent; now: Date }) {
         </div>
       </div>
       <div className="min-w-0">
-        <div className="leading-snug font-semibold">
+        <div className="text-lg leading-snug font-semibold">
           {days > 0 ? `${days === 1 ? "day" : "days"} until ${next.title}` : next.title}
         </div>
         <div className="text-sm text-muted-foreground">{range}</div>
@@ -83,25 +83,22 @@ export default function Home() {
 
   const links = useMemo(() => (ready ? feedLinks(window.location.origin, settings) : null), [ready, settings]);
   const rows = useMemo(() => (now ? upcoming(events, settings, now) : []), [events, settings, now]);
+  const apple = ready && /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
   const next = rows.find((e) => e.category === "break" || e.category === "finals") ?? rows[0];
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1040px] items-center gap-2.5 px-6">
-          <CalendarDaysIcon className="size-6 text-brand" />
-          <span className="text-lg font-medium">UMD Calendar</span>
-        </div>
-      </header>
-
-      <main className="mx-auto grid max-w-[1040px] px-6 py-8 md:grid-cols-[300px_1fr]">
-        <Customizer
-          settings={settings}
-          onChange={setEdited}
-          links={links}
-          top={next && now ? <Countdown next={next} now={now} /> : null}
-        />
-        <div className="mt-8 md:mt-0 md:pl-10">
+    <div className="min-h-screen bg-background">
+      <main className="mx-auto grid max-w-[1040px] gap-10 px-6 py-8 md:grid-cols-[320px_1fr] md:gap-16 md:py-12">
+        <aside className="space-y-6 md:sticky md:top-12 md:max-h-[calc(100vh-6rem)] md:self-start md:overflow-y-auto md:overscroll-contain">
+          <h1 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <CalendarDaysIcon className="size-4 text-brand" aria-hidden />
+            UMD Calendar
+          </h1>
+          {next && now && <Countdown next={next} now={now} />}
+          <Subscribe links={links} apple={apple} />
+          <Customize settings={settings} onChange={setEdited} />
+        </aside>
+        <div>
           {failed ? (
             <p className="text-muted-foreground">Couldn&apos;t load the calendar. Try again in a moment.</p>
           ) : (
