@@ -1,3 +1,5 @@
+import os
+import re
 import time
 
 import requests
@@ -8,6 +10,7 @@ from scrape import CATEGORIES, Event, fetch_events
 
 TERMS = ("fall", "winter", "spring", "summer")
 CACHE_SECONDS = 6 * 3600
+SUB_PATTERN = re.compile(r"[A-Za-z0-9-]{8,40}")
 
 app = FastAPI()
 _cache: tuple[float, list[Event]] | None = None
@@ -41,8 +44,31 @@ def parse_alerts(raw: str) -> tuple[int, ...]:
     return tuple(sorted(days, reverse=True))
 
 
+def record_hit(sub: str) -> None:
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_KEY")
+    if not url or not SUB_PATTERN.fullmatch(sub):
+        return
+    # Counting is best-effort, a database problem must never break someone's calendar.
+    # A repeat hit on the same day gets a 409 from the primary key, which is fine.
+    try:
+        requests.post(
+            f"{url}/rest/v1/feed_hits",
+            json={"sub": sub},
+            headers={
+                "apikey": key,
+                "Authorization": f"Bearer {key}",
+                "Prefer": "return=minimal",
+            },
+            timeout=2,
+        )
+    except requests.RequestException:
+        pass
+
+
 @app.get("/api/events.json")
-def events() -> list[Event]:
+def events(response: Response) -> list[Event]:
+    response.headers["Cache-Control"] = "public, s-maxage=21600"
     return get_events()
 
 
@@ -52,7 +78,9 @@ def feed(
     hour: int = Query(9, ge=0, le=23),
     cats: str = ",".join(CATEGORIES),
     terms: str = ",".join(TERMS),
+    sub: str = "",
 ) -> Response:
+    record_hit(sub)
     alert_days = parse_alerts(alerts)
     wanted_cats = parse_set(cats, CATEGORIES, "category")
     wanted_terms = parse_set(terms, TERMS, "term")

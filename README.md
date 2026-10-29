@@ -22,6 +22,7 @@ The API scrapes the [UMD Academic Catalog semester calendar](https://academiccat
 | `hour` | `9` | hour of day (0-23) the reminder fires |
 | `cats` | all | `break,finals,classes,other` |
 | `terms` | all | `fall,winter,spring,summer` |
+| `sub` | none | random per-browser ID the site adds, used only to count active subscribers |
 
 Example: `/api/feed.ics?alerts=14,3,0&hour=8&cats=break,finals`
 
@@ -58,3 +59,5 @@ The parser is tested against a saved copy of the page (`tests/catalog_fixture.ht
 ## Deploy
 
 Import the repo into Vercel. It builds the Next.js app and runs `api/index.py` as a Python function; `vercel.json` rewrites `/api/*` to it. Deployed at https://umd-calendar-tau.vercel.app; every push to `main` redeploys.
+
+Subscriber counting needs `SUPABASE_URL` and `SUPABASE_KEY` (the publishable key) set in Vercel. Feed fetches write `(sub, day)` rows to a `feed_hits` table that only allows inserts. Without the variables the feed works the same and nothing is recorded.

@@ -71,9 +71,24 @@ export function toParams(s: Settings): URLSearchParams {
   });
 }
 
+// A random ID per browser so the feed can count subscribers. Google Calendar fetches
+// each feed URL once for everyone on it, so without this every subscriber looks the same.
+function subscriberId(): string {
+  try {
+    const saved = localStorage.getItem("sub");
+    if (saved) return saved;
+    const id = crypto.randomUUID();
+    localStorage.setItem("sub", id);
+    return id;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
 export function feedLinks(origin: string, s: Settings) {
   const url = new URL("/api/feed.ics", origin);
   url.search = toParams(s).toString();
+  url.searchParams.set("sub", subscriberId());
   const webcal = url.href.replace(/^https?:/, "webcal:");
   return {
     url: url.href,

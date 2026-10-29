@@ -65,6 +65,37 @@ def test_invalid_params_rejected(client, params):
     assert client.get("/api/feed.ics", params=params).status_code == 422
 
 
+@pytest.fixture
+def posts(monkeypatch):
+    calls = []
+    monkeypatch.setenv("SUPABASE_URL", "https://db.example")
+    monkeypatch.setenv("SUPABASE_KEY", "key")
+    monkeypatch.setattr(app_module.requests, "post", lambda url, **kw: calls.append((url, kw["json"])))
+    return calls
+
+
+def test_feed_records_subscriber(client, posts):
+    client.get("/api/feed.ics", params={"sub": "3f2b9c1e-0a4d-4e8f-9b7a-1c2d3e4f5a6b"})
+    assert posts == [("https://db.example/rest/v1/feed_hits", {"sub": "3f2b9c1e-0a4d-4e8f-9b7a-1c2d3e4f5a6b"})]
+
+
+@pytest.mark.parametrize("sub", ["", "short", "not valid!"])
+def test_feed_skips_missing_or_bad_subscriber(client, posts, sub):
+    client.get("/api/feed.ics", params={"sub": sub})
+    assert posts == []
+
+
+def test_feed_survives_database_errors(client, monkeypatch):
+    monkeypatch.setenv("SUPABASE_URL", "https://db.example")
+
+    def fail(*args, **kwargs):
+        raise app_module.requests.ConnectionError
+
+    monkeypatch.setattr(app_module.requests, "post", fail)
+    resp = client.get("/api/feed.ics", params={"sub": "3f2b9c1e-0a4d-4e8f-9b7a-1c2d3e4f5a6b"})
+    assert resp.status_code == 200
+
+
 def test_events_json(client):
     rows = client.get("/api/events.json").json()
     assert len(rows) == 27
