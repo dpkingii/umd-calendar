@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckIcon, InfoIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, InfoIcon } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
@@ -10,6 +10,10 @@ import { CATS, LEADS, TERMS, type Settings } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
 
 type Links = { url: string; apple: string; google: string };
+
+const ICON_SWAP = "col-start-1 row-start-1 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
+const ICON_SHOWN = "scale-100 opacity-100 blur-none";
+const ICON_HIDDEN = "opacity-0 motion-safe:scale-25 motion-safe:blur-[4px]";
 
 export function Chips<T extends string | number>({
   options,
@@ -28,7 +32,7 @@ export function Chips<T extends string | number>({
           variant="outline"
           pressed={value.includes(v)}
           onPressedChange={(on) => onChange(options.map(([o]) => o).filter((o) => (o === v ? on : value.includes(o))))}
-          className="h-8 rounded-full px-3 text-muted-foreground aria-pressed:border-brand/40 aria-pressed:bg-brand/10 aria-pressed:text-brand aria-pressed:hover:bg-brand/15"
+          className="h-8 rounded-full px-3 text-muted-foreground [-webkit-tap-highlight-color:transparent] aria-pressed:border-brand/40 aria-pressed:bg-brand/10 aria-pressed:text-brand aria-pressed:hover:bg-brand/15"
         >
           {value.includes(v) && <CheckIcon />}
           {label}
@@ -83,7 +87,7 @@ export function Customizer({
   };
 
   return (
-    <div className="space-y-5 md:sticky md:top-20 md:max-h-[calc(100vh-6rem)] md:self-start md:overflow-y-auto md:border-r md:pr-8">
+    <div className="space-y-5 md:sticky md:top-20 md:max-h-[calc(100vh-6rem)] md:self-start md:overflow-y-auto md:overscroll-contain md:border-r md:pr-8">
         {top}
         <Group
           title="Remind me"
@@ -114,6 +118,10 @@ export function Customizer({
               Apple Calendar
             </a>
             <Button variant="outline" size="lg" className="h-10 rounded-full" onClick={copy}>
+              <span className="grid" aria-hidden>
+                <CopyIcon className={cn(ICON_SWAP, copied ? ICON_HIDDEN : ICON_SHOWN)} />
+                <CheckIcon className={cn(ICON_SWAP, copied ? ICON_SHOWN : ICON_HIDDEN)} />
+              </span>
               {copied ? "Copied" : "Copy link"}
             </Button>
           </div>
