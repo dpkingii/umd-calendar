@@ -40,10 +40,10 @@ export const LEADS: [number, string][] = [
 export const CAT_NAME = Object.fromEntries(CATS) as Record<Category, string>;
 
 export const DEFAULTS: Settings = {
-  alerts: [7, 1],
+  alerts: [],
   hour: 9,
   cats: CATS.map(([c]) => c),
-  terms: TERMS.map(([t]) => t),
+  terms: ["fall", "spring"],
 };
 
 const DAY_MS = 86400000;
