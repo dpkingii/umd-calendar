@@ -9,7 +9,7 @@ A subscribable calendar of UMD academic dates (fall break, finals, holidays, ter
 - **Frontend:** Next.js + Tailwind + [shadcn/ui](https://ui.shadcn.com) (`app/`, `components/`, `lib/`)
 - **Backend:** FastAPI (`app.py`, `scrape.py`, `build_ics.py`), served on Vercel via `api/index.py`
 
-The API scrapes the [UMD Academic Catalog semester calendar](https://academiccatalog.umd.edu/about-university/academic-calendar/semester-calendar/) (cached 6 hours) and serves:
+The API scrapes the [UMD Academic Catalog semester calendar](https://academiccatalog.umd.edu/about-university/academic-calendar/semester-calendar/) (cached for a day) and serves:
 
 - `/api/feed.ics` an RFC 5545 feed built from query params
 - `/api/events.json` the parsed events

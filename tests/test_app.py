@@ -96,6 +96,38 @@ def test_feed_survives_database_errors(client, monkeypatch):
     assert resp.status_code == 200
 
 
+class FakeResponse:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def raise_for_status(self):
+        pass
+
+    def json(self):
+        return self.rows
+
+
+def test_feed_reads_cached_events_json_on_vercel(client, monkeypatch):
+    rows = client.get("/api/events.json").json()
+    urls = []
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.setattr(app_module, "get_events", lambda: pytest.fail("feed scraped instead of reading events.json"))
+    monkeypatch.setattr(app_module.requests, "get", lambda url, **kw: urls.append(url) or FakeResponse(rows))
+    resp = client.get("/api/feed.ics")
+    assert urls == ["http://testserver/api/events.json"]
+    assert len(vevents(resp)) == 27
+
+
+def test_feed_falls_back_to_scraping_when_events_json_fails(client, monkeypatch):
+    monkeypatch.setenv("VERCEL", "1")
+
+    def fail(*args, **kwargs):
+        raise app_module.requests.ConnectionError
+
+    monkeypatch.setattr(app_module.requests, "get", fail)
+    assert len(vevents(client.get("/api/feed.ics"))) == 27
+
+
 def test_events_json(client):
     rows = client.get("/api/events.json").json()
     assert len(rows) == 27
