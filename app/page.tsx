@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import Link from "next/link";
-import { BellIcon, CalendarIcon, ChevronDownIcon, RefreshCwIcon, ShieldCheckIcon } from "lucide-react";
+import { BellIcon, CalendarIcon, ChevronDownIcon, RefreshCwIcon, ShieldCheckIcon, UsersIcon } from "lucide-react";
 
 import { Customize, Subscribe } from "@/components/customizer";
 import { DOT, Timeline, TimelineSkeleton } from "@/components/timeline";
@@ -27,6 +27,8 @@ const GITHUB = "https://github.com/dpkingii/umd-calendar";
 const CATALOG = "https://academiccatalog.umd.edu/about-university/academic-calendar/semester-calendar/";
 const WIDTH = "mx-auto w-full max-w-[1120px] px-6";
 const NAV_LINK = "transition-[color] duration-150 ease-out hover:text-foreground";
+// A small count reads as "nobody uses this", so the counter stays hidden until it's worth showing.
+const SHOW_COUNT_FROM = 50;
 
 const STEPS = [
   ["Pick your dates", "Choose breaks, finals, and class start and end dates for the terms you care about, plus when to be reminded."],
@@ -107,6 +109,7 @@ export default function Home() {
   const [edited, setEdited] = useState<Settings | null>(null);
   const [events, setEvents] = useState<CalEvent[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [subscribers, setSubscribers] = useState<number | null>(null);
 
   const settings = edited ?? (ready ? parseSettings(window.location.search) : DEFAULTS);
   const now = useMemo(() => (ready ? new Date() : null), [ready]);
@@ -116,6 +119,10 @@ export default function Home() {
       .then((r) => (r.ok ? (r.json() as Promise<ApiEvent[]>) : Promise.reject()))
       .then((data) => setEvents(toEvents(data)))
       .catch(() => setFailed(true));
+    fetch("/api/stats")
+      .then((r) => r.json() as Promise<{ subscribers: number | null }>)
+      .then((s) => setSubscribers(s.subscribers))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -161,6 +168,12 @@ export default function Home() {
                 reminders. Free, with no account.
               </p>
               <ul className="space-y-2 text-sm text-muted-foreground">
+                {subscribers !== null && subscribers >= SHOW_COUNT_FROM && (
+                  <li className="flex items-center gap-2">
+                    <UsersIcon className="size-4 text-foreground" strokeWidth={1.5} aria-hidden />
+                    Added by {subscribers.toLocaleString()} people so far
+                  </li>
+                )}
                 <li className="flex items-center gap-2">
                   <RefreshCwIcon className="size-4 text-foreground" strokeWidth={1.5} aria-hidden />
                   Synced daily from the UMD Academic Catalog

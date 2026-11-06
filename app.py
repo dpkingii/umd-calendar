@@ -62,25 +62,33 @@ def parse_alerts(raw: str) -> tuple[int, ...]:
     return tuple(sorted(days, reverse=True))
 
 
-def insert_row(table: str, row: dict) -> None:
+def supabase_post(path: str, **kwargs) -> requests.Response | None:
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_KEY")
     if not url:
-        return
+        return None
+    return requests.post(
+        f"{url}/rest/v1/{path}",
+        headers={"apikey": key, "Authorization": f"Bearer {key}"},
+        timeout=2,
+        **kwargs,
+    )
+
+
+def insert_row(table: str, row: dict) -> None:
     # Counting is best-effort, a database problem must never break someone's calendar.
     try:
-        requests.post(
-            f"{url}/rest/v1/{table}",
-            json=row,
-            headers={
-                "apikey": key,
-                "Authorization": f"Bearer {key}",
-                "Prefer": "return=minimal",
-            },
-            timeout=2,
-        )
+        supabase_post(table, json=row)
     except requests.RequestException:
         pass
+
+
+def subscriber_count() -> int | None:
+    try:
+        resp = supabase_post("rpc/subscriber_count")
+        return resp.json() if resp is not None and resp.ok else None
+    except (requests.RequestException, ValueError):
+        return None
 
 
 def record_hit(sub: str) -> None:
@@ -93,6 +101,12 @@ def record_hit(sub: str) -> None:
 def click(method: Literal["google", "apple", "copy"], sub: str = "") -> Response:
     insert_row("subscribe_clicks", {"method": method, "sub": sub if SUB_PATTERN.fullmatch(sub) else None})
     return Response(status_code=204)
+
+
+@app.get("/api/stats")
+def stats(response: Response) -> dict[str, int | None]:
+    response.headers["Cache-Control"] = "public, s-maxage=3600"
+    return {"subscribers": subscriber_count()}
 
 
 @app.get("/api/events.json")

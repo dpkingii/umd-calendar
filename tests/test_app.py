@@ -115,6 +115,8 @@ def test_click_rejects_unknown_method(client, posts):
 
 
 class FakeResponse:
+    ok = True
+
     def __init__(self, rows):
         self.rows = rows
 
@@ -123,6 +125,24 @@ class FakeResponse:
 
     def json(self):
         return self.rows
+
+
+def test_stats_reports_subscriber_count(client, monkeypatch):
+    urls = []
+    monkeypatch.setenv("SUPABASE_URL", "https://db.example")
+    monkeypatch.setattr(app_module.requests, "post", lambda url, **kw: urls.append(url) or FakeResponse(312))
+    assert client.get("/api/stats").json() == {"subscribers": 312}
+    assert urls == ["https://db.example/rest/v1/rpc/subscriber_count"]
+
+
+def test_stats_survives_database_errors(client, monkeypatch):
+    monkeypatch.setenv("SUPABASE_URL", "https://db.example")
+
+    def fail(*args, **kwargs):
+        raise app_module.requests.ConnectionError
+
+    monkeypatch.setattr(app_module.requests, "post", fail)
+    assert client.get("/api/stats").json() == {"subscribers": None}
 
 
 def test_feed_reads_cached_events_json_on_vercel(client, monkeypatch):
