@@ -60,9 +60,9 @@ function Row({ e, settings, now }: { e: CalEvent; settings: Settings; now: Date 
                 <TooltipTrigger
                   delay={100}
                   closeDelay={150}
-                  className="-my-1 inline-flex items-center gap-1 rounded py-1 transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  className="-my-1 inline-flex items-center gap-1 py-1 transition-[color] duration-150 ease-out hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <BellIcon className="size-3.5" aria-hidden />
+                  <BellIcon className="size-3.5" strokeWidth={1.5} aria-hidden />
                   {plural(alerts.length, "reminder")}
                 </TooltipTrigger>
                 <TooltipContent>{alerts.map((a) => `${fmtDay(a)}, ${hourLabel(a.getHours())}`).join(" and ")}</TooltipContent>

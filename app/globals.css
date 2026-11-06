@@ -73,4 +73,8 @@
   html {
     @apply font-sans;
   }
+  /* Lucide scales its 24px-grid stroke down with the icon, so pin strokeWidth to rendered pixels. */
+  svg.lucide * {
+    vector-effect: non-scaling-stroke;
+  }
 }

@@ -14,7 +14,7 @@ type Links = { url: string; apple: string; google: string };
 const ICON_SWAP = "col-start-1 row-start-1 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
 const ICON_SHOWN = "scale-100 opacity-100 blur-none";
 const ICON_HIDDEN = "opacity-0 motion-safe:scale-25 motion-safe:blur-[4px]";
-const SECONDARY = "h-10 border-foreground [-webkit-tap-highlight-color:transparent]";
+const SECONDARY = "h-10 border-foreground";
 
 export function Chips<T extends string | number>({
   options,
@@ -33,7 +33,7 @@ export function Chips<T extends string | number>({
           variant="outline"
           pressed={value.includes(v)}
           onPressedChange={(on) => onChange(options.map(([o]) => o).filter((o) => (o === v ? on : value.includes(o))))}
-          className="h-8 px-3 text-muted-foreground [-webkit-tap-highlight-color:transparent] hover:border-foreground/40 hover:bg-transparent aria-pressed:border-foreground aria-pressed:bg-transparent aria-pressed:text-foreground aria-pressed:hover:bg-transparent [&_svg]:text-brand"
+          className="h-8 px-3 text-muted-foreground has-[svg]:pl-2.5 hover:border-foreground/40 hover:bg-transparent aria-pressed:border-foreground aria-pressed:bg-transparent aria-pressed:text-foreground aria-pressed:hover:bg-transparent [&_svg]:text-brand"
         >
           {value.includes(v) && <CheckIcon />}
           {label}
@@ -54,7 +54,7 @@ function Group({ title, info, children }: { title: string; info?: string; childr
               aria-label={`About ${title.toLowerCase()}`}
               delay={100}
               closeDelay={150}
-              className="-m-1.5 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="-m-1.5 p-1.5 text-muted-foreground transition-[color] duration-150 ease-out hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               <InfoIcon className="size-4" />
             </TooltipTrigger>

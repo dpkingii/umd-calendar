@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import Link from "next/link";
-import { BellIcon, CalendarDaysIcon, ChevronDownIcon, RefreshCwIcon, ShieldCheckIcon } from "lucide-react";
+import { BellIcon, CalendarIcon, ChevronDownIcon, RefreshCwIcon, ShieldCheckIcon } from "lucide-react";
 
 import { Customize, Subscribe } from "@/components/customizer";
 import { DOT, Timeline, TimelineSkeleton } from "@/components/timeline";
@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 const GITHUB = "https://github.com/dpkingii/umd-calendar";
 const CATALOG = "https://academiccatalog.umd.edu/about-university/academic-calendar/semester-calendar/";
 const WIDTH = "mx-auto w-full max-w-[1120px] px-6";
-const NAV_LINK = "transition-colors hover:text-foreground";
+const NAV_LINK = "transition-[color] duration-150 ease-out hover:text-foreground";
 
 const STEPS = [
   ["Pick your dates", "Choose breaks, finals, and class start and end dates for the terms you care about, plus when to be reminded."],
@@ -64,7 +64,7 @@ const FAQ = [
 function Logo() {
   return (
     <span className="flex size-7 items-center justify-center bg-brand text-white">
-      <CalendarDaysIcon className="size-4" aria-hidden />
+      <CalendarIcon className="size-4" strokeWidth={2.5} aria-hidden />
     </span>
   );
 }
@@ -162,15 +162,15 @@ export default function Home() {
               </p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
-                  <RefreshCwIcon className="size-4 text-foreground" aria-hidden />
+                  <RefreshCwIcon className="size-4 text-foreground" strokeWidth={1.5} aria-hidden />
                   Synced daily from the UMD Academic Catalog
                 </li>
                 <li className="flex items-center gap-2">
-                  <BellIcon className="size-4 text-foreground" aria-hidden />
+                  <BellIcon className="size-4 text-foreground" strokeWidth={1.5} aria-hidden />
                   Reminders on the days you pick
                 </li>
                 <li className="flex items-center gap-2">
-                  <ShieldCheckIcon className="size-4 text-foreground" aria-hidden />
+                  <ShieldCheckIcon className="size-4 text-foreground" strokeWidth={1.5} aria-hidden />
                   No account, name, or email
                 </li>
               </ul>
@@ -238,7 +238,7 @@ export default function Home() {
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-medium [-webkit-tap-highlight-color:transparent] [&::-webkit-details-marker]:hidden">
                   {q}
                   <ChevronDownIcon
-                    className="size-4 shrink-0 text-muted-foreground group-open:rotate-180 motion-safe:transition-[rotate] motion-safe:duration-150"
+                    className="size-4 shrink-0 text-muted-foreground group-open:rotate-180 motion-safe:transition-[rotate] motion-safe:duration-150 motion-safe:ease-out"
                     aria-hidden
                   />
                 </summary>
@@ -254,12 +254,12 @@ export default function Home() {
           <p className="max-w-[60ch] text-pretty">
             An independent student project, not affiliated with or endorsed by the University of Maryland. Dates
             come from the{" "}
-            <a className="underline underline-offset-2 hover:text-foreground" href={CATALOG}>
+            <a className={cn(NAV_LINK, "underline underline-offset-2")} href={CATALOG}>
               UMD Academic Catalog
             </a>{" "}
             and are subject to change.
           </p>
-          <a className="shrink-0 underline underline-offset-2 hover:text-foreground" href={GITHUB}>
+          <a className={cn(NAV_LINK, "shrink-0 underline underline-offset-2")} href={GITHUB}>
             Source on GitHub
           </a>
         </div>
