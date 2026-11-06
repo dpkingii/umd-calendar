@@ -96,6 +96,24 @@ def test_feed_survives_database_errors(client, monkeypatch):
     assert resp.status_code == 200
 
 
+def test_click_records_method_and_subscriber(client, posts):
+    resp = client.post("/api/click", params={"method": "google", "sub": "3f2b9c1e-0a4d-4e8f-9b7a-1c2d3e4f5a6b"})
+    assert resp.status_code == 204
+    assert posts == [
+        ("https://db.example/rest/v1/subscribe_clicks", {"method": "google", "sub": "3f2b9c1e-0a4d-4e8f-9b7a-1c2d3e4f5a6b"})
+    ]
+
+
+def test_click_counts_without_valid_subscriber(client, posts):
+    client.post("/api/click", params={"method": "copy", "sub": "not valid!"})
+    assert posts == [("https://db.example/rest/v1/subscribe_clicks", {"method": "copy", "sub": None})]
+
+
+def test_click_rejects_unknown_method(client, posts):
+    assert client.post("/api/click", params={"method": "outlook"}).status_code == 422
+    assert posts == []
+
+
 class FakeResponse:
     def __init__(self, rows):
         self.rows = rows

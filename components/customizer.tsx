@@ -6,7 +6,7 @@ import { CheckIcon, CopyIcon, InfoIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { CATS, LEADS, TERMS, type Settings } from "@/lib/calendar";
+import { CATS, LEADS, TERMS, trackClick, type Settings } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
 
 type Links = { url: string; apple: string; google: string };
@@ -72,6 +72,7 @@ export function Subscribe({ links }: { links: Links | null }) {
 
   const copy = async () => {
     if (!links) return;
+    trackClick("copy");
     await navigator.clipboard.writeText(links.url);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
@@ -83,12 +84,13 @@ export function Subscribe({ links }: { links: Links | null }) {
         href={links?.google}
         target="_blank"
         rel="noopener"
+        onClick={() => trackClick("google")}
         className={cn(buttonVariants({ size: "lg" }), "h-11 w-full bg-brand text-base text-white hover:bg-brand/90")}
       >
         Add to Google Calendar
       </a>
       <div className="grid grid-cols-2 gap-2">
-        <a href={links?.apple} className={cn(buttonVariants({ variant: "outline", size: "lg" }), SECONDARY)}>
+        <a href={links?.apple} onClick={() => trackClick("apple")} className={cn(buttonVariants({ variant: "outline", size: "lg" }), SECONDARY)}>
           Apple Calendar
         </a>
         <button

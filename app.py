@@ -2,6 +2,7 @@ import os
 import re
 import time
 from datetime import date
+from typing import Literal
 
 import requests
 from fastapi import FastAPI, HTTPException, Query, Request, Response
@@ -61,17 +62,16 @@ def parse_alerts(raw: str) -> tuple[int, ...]:
     return tuple(sorted(days, reverse=True))
 
 
-def record_hit(sub: str) -> None:
+def insert_row(table: str, row: dict) -> None:
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_KEY")
-    if not url or not SUB_PATTERN.fullmatch(sub):
+    if not url:
         return
     # Counting is best-effort, a database problem must never break someone's calendar.
-    # A repeat hit on the same day gets a 409 from the primary key, which is fine.
     try:
         requests.post(
-            f"{url}/rest/v1/feed_hits",
-            json={"sub": sub},
+            f"{url}/rest/v1/{table}",
+            json=row,
             headers={
                 "apikey": key,
                 "Authorization": f"Bearer {key}",
@@ -81,6 +81,18 @@ def record_hit(sub: str) -> None:
         )
     except requests.RequestException:
         pass
+
+
+def record_hit(sub: str) -> None:
+    # A repeat hit on the same day gets a 409 from the primary key, which is fine.
+    if SUB_PATTERN.fullmatch(sub):
+        insert_row("feed_hits", {"sub": sub})
+
+
+@app.post("/api/click")
+def click(method: Literal["google", "apple", "copy"], sub: str = "") -> Response:
+    insert_row("subscribe_clicks", {"method": method, "sub": sub if SUB_PATTERN.fullmatch(sub) else None})
+    return Response(status_code=204)
 
 
 @app.get("/api/events.json")

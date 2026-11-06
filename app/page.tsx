@@ -57,7 +57,7 @@ const FAQ = [
   ],
   [
     "What do you collect?",
-    "No accounts, names, or emails. Your feed link includes a random ID so the site can count how many calendars are subscribed. That's all it's used for.",
+    "No accounts, names, or emails. Your browser keeps a random ID so the site can count which subscribe buttons get clicked and how many calendars are subscribed. That's all it's used for.",
   ],
 ];
 

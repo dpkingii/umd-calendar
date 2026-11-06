@@ -87,6 +87,11 @@ function subscriberId(): string {
   }
 }
 
+// A beacon still sends when the click navigates away to Google or the Calendar app.
+export function trackClick(method: "google" | "apple" | "copy") {
+  navigator.sendBeacon(`/api/click?method=${method}&sub=${subscriberId()}`);
+}
+
 export function feedLinks(origin: string, s: Settings) {
   const url = new URL("/api/feed.ics", origin);
   url.search = toParams(s).toString();
