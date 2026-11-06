@@ -13,9 +13,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description = "Subscribe to UMD breaks, finals, and holidays with reminders set the way you like.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://umd-calendar-tau.vercel.app"),
   title: "UMD Calendar Feed",
-  description: "Subscribe to UMD breaks, finals, and holidays with reminders set the way you like.",
+  description,
+  openGraph: { title: "UMD Calendar Feed", description, siteName: "UMD Calendar Feed", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

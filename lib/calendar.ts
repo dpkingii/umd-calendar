@@ -42,30 +42,13 @@ export const CAT_NAME = Object.fromEntries(CATS) as Record<Category, string>;
 export const DEFAULTS: Settings = {
   alerts: [],
   hour: 9,
-  cats: CATS.map(([c]) => c),
+  cats: ["break", "finals", "classes"],
   terms: ["fall", "spring"],
 };
 
 const DAY_MS = 86400000;
 
 export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-
-export function summarize(s: Settings): string[] {
-  const terms =
-    s.terms.length === TERMS.length
-      ? "All terms"
-      : TERMS.filter(([t]) => s.terms.includes(t)).map(([, label]) => label).join(" + ") || "No terms";
-  const cats =
-    s.cats.length === CATS.length
-      ? "All events"
-      : s.cats.length === 1
-        ? CAT_NAME[s.cats[0]]
-        : s.cats.length
-          ? plural(s.cats.length, "event type")
-          : "No events";
-  const alerts = s.alerts.length ? plural(s.alerts.length, "reminder") : "No reminders";
-  return [terms, cats, alerts];
-}
 
 export function parseSettings(search: string): Settings {
   const q = new URLSearchParams(search);

@@ -3,6 +3,7 @@ import { BellIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   CAT_NAME,
+  daysUntil,
   fmtDay,
   hourLabel,
   plural,
@@ -13,10 +14,10 @@ import {
 } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
 
-const DOT: Record<Category, string> = {
-  break: "bg-teal-500",
-  finals: "bg-amber-400",
-  classes: "bg-sky-500",
+export const DOT: Record<Category, string> = {
+  break: "bg-brand",
+  finals: "bg-gold ring-1 ring-amber-500/50 ring-inset",
+  classes: "bg-foreground",
   other: "bg-stone-400",
 };
 
@@ -26,6 +27,7 @@ const weekday = (d: Date) => d.toLocaleDateString("en-US", { weekday: "short" })
 function Row({ e, settings, now }: { e: CalEvent; settings: Settings; now: Date }) {
   const alerts = reminders(e, settings, now);
   const multi = e.s.getTime() !== e.e.getTime();
+  const ongoing = daysUntil(e, now) <= 0;
   return (
     <article className="grid grid-cols-[3.5rem_1fr] items-center gap-4 py-3">
       <div className="text-center leading-tight">
@@ -37,8 +39,14 @@ function Row({ e, settings, now }: { e: CalEvent; settings: Settings; now: Date 
       <div className="min-w-0">
         <div className="font-medium">{e.title}</div>
         <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
-          <span className={cn("size-2 rounded-full", DOT[e.category])} aria-hidden />
+          <span className={cn("size-2", DOT[e.category])} aria-hidden />
           {CAT_NAME[e.category]}
+          {ongoing && (
+            <>
+              <span aria-hidden>·</span>
+              <span className="font-medium text-brand">{multi ? "Happening now" : "Today"}</span>
+            </>
+          )}
           {multi && (
             <>
               <span aria-hidden>·</span>
@@ -88,16 +96,25 @@ export function Timeline({ events, settings, now }: { events: CalEvent[]; settin
           </div>
         </section>
       ))}
-      <footer className="mt-8 border-t pt-6 text-sm text-muted-foreground">
-        Source:{" "}
-        <a
-          className="underline underline-offset-2"
-          href="https://academiccatalog.umd.edu/about-university/academic-calendar/semester-calendar/"
-        >
-          UMD Academic Catalog
-        </a>
-        . Dates are subject to change.
-      </footer>
+    </div>
+  );
+}
+
+export function TimelineSkeleton() {
+  return (
+    <div aria-busy="true" aria-label="Loading dates">
+      <div className="my-2 h-3 w-28 bg-muted" />
+      <div className="divide-y divide-border">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} className="grid grid-cols-[3.5rem_1fr] items-center gap-4 py-3 motion-safe:animate-pulse">
+            <div className="mx-auto h-9 w-8 bg-muted" />
+            <div className="space-y-2">
+              <div className="h-4 w-48 max-w-full bg-muted" />
+              <div className="h-3 w-32 bg-muted" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
