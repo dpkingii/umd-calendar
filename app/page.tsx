@@ -46,8 +46,8 @@ const FAQ = [
     "Your choices are saved in your feed link. To change them, remove the calendar, pick new options here, and subscribe again.",
   ],
   [
-    "How do I remove it?",
-    "Remove it like any other subscribed calendar. In Google Calendar, find it under Other calendars, open its options, and unsubscribe. In Apple Calendar, right-click it in the sidebar and unsubscribe.",
+    "How do I unsubscribe or remove the calendar?",
+    "Remove it like any other subscribed calendar, and its events disappear with it. In Google Calendar, find it under Other calendars, open its options, and unsubscribe. In Apple Calendar on a Mac, right-click it in the sidebar and unsubscribe. On an iPhone, open Calendars, tap the info button next to it, and choose Delete Calendar. In Outlook, right-click it in the calendar list and choose Remove.",
   ],
   [
     "Does it work with Outlook?",
